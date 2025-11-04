@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dockerize React App (Multi Stage Build)</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f9fafc;
+  color: #111;
+  padding: 20px;
+}
+
+h1 {
+  color: #0078d4;
+}
+
+pre {
+  background: #111;
+  color: #f4f4f4;
+  padding: 12px;
+  border-radius: 8px;
+  overflow: auto;
+}
+
+.section {
+  margin-bottom: 25px;
+}
+</style>
+</head>
+
+<body>
+<h1>Dockerize React Application with Multi Stage Build</h1>
+
+<div class="section">
+<h2>Objective</h2>
+<p>Learn to create a lightweight, production-ready Docker image for a React app using a multi-stage build.</p>
+</div>
+
+<div class="section">
+<h2>Create React App</h2>
+<pre>
+npx create-react-app react-docker-app
+cd react-docker-app
+npm run build
+</pre>
+</div>
+
+<div class="section">
+<h2>Dockerfile (Multi-Stage)</h2>
+<pre>
+# Stage 1: Build the React app
+FROM node:18-alpine AS build
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+
+# Stage 2: Serve using Nginx
+FROM nginx:stable-alpine
+COPY --from=build /app/build /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+</pre>
+</div>
+
+<div class="section">
+<h2>.dockerignore</h2>
+<pre>
+node_modules
+build
+Dockerfile
+.git
+.gitignore
+</pre>
+</div>
+
+<div class="section">
+<h2>Build & Run</h2>
+<pre>
+# Build Docker image
+docker build -t react-docker-app .
+
+# Run container
+docker run -p 8088:80 react-docker-app
+</pre>
+
+<p>Visit in browser: <strong>http://localhost:8088</strong></p>
+</div>
+
+<div class="section">
+<h2>Verification</h2>
+<ul>
+<li>React runs at <strong>http://localhost:8088</strong></li>
+<li>Image is production optimized</li>
+<li>Separate build & runtime stages</li>
+</ul>
+</div>
+
+</body>
+</html>
